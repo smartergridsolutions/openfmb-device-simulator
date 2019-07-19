@@ -1,0 +1,9 @@
+.coverage
+.pytest_cache
+.tox/
+.vscode/
+build/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/

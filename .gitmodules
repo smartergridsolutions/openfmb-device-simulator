@@ -1,0 +1,3 @@
+[submodule "deps/openfmb"]
+	path = deps/openfmb
+	url = https://gitlab.com/openfmb/psm/ops/protobuf/python-openfmb-ops-protobuf.git
