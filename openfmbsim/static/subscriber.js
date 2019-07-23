@@ -21,12 +21,12 @@
  * @param {string} name The name of the value that is being added.
  * @param {any} value The value that is being added.
  */
-var addDefinition = function (parent, name, value) {
-    var tr = document.createElement("tr");
-    var tdName = document.createElement("td");
+const addDefinition = (parent, name, value) => {
+    const tr = document.createElement("tr");
+    const tdName = document.createElement("td");
     tdName.textContent = name;
 
-    var tdValue = document.createElement("td");
+    const tdValue = document.createElement("td");
     tdValue.textContent = value
 
     tr.appendChild(tdName);
@@ -35,19 +35,36 @@ var addDefinition = function (parent, name, value) {
 }
 
 /**
+ * Adds information about the conducting equipment associated with the message.
+ * @param {Element} parent The parent node to add into.
+ * @param {object} profile The parsed profile.
+ * @param {array} keys The list of keys to look for conducting equipment.
+ */
+const addConductingEquipment = (parent, profile, keys) => {
+    Object.keys(profile)
+        .filter(key => keys.includes(key))
+        .forEach(key => {
+            addDefinition(parent, "Conducting Equipment Name",
+                          profile[key].conductingEquipment.namedObject.name)
+            addDefinition(parent, "Conducting Equipment MRID",
+                          profile[key].conductingEquipment.mRID)
+        })
+}
+
+/**
  * Add a list of simple values into the table.
  * @param {Element} parent The parent table to insert into.
  * @param {object} values Object of values to insert. These values are JSON
  *                        objects following the normal OpenFMB structure.
  */
-var addValuesDefinition = function (parent, values) {
-    Object.keys(values).forEach(function (key) {
-        var units = values[key].units.value;
+const addValuesDefinition = (parent, values) => {
+    Object.keys(values).forEach(key => {
+        let units = values[key].units.value;
         if (units && units.startsWith("UnitSymbolKind_")) {
             units = " " + units.substr(15);
         }
         // If the value is the default, then it is omitted
-        var value = values[key].actVal || 0
+        const value = values[key].actVal || 0
         addDefinition(parent, key, "" + value + units);
     })
 }
@@ -58,16 +75,17 @@ var addValuesDefinition = function (parent, values) {
  * @param {Element} parent The parent table to insert into.
  * @param {object} values Object of phase values to insert.
  */
-var addPhaseValuesDefinition = function (parent, values) {
-    Object.keys(values).forEach(function (key) {
-        var phaseValues = values[key]
-        Object.keys(phaseValues).forEach(function (phase) {
-            var units = phaseValues[phase].units && phaseValues[phase].units.SIUnit || "";
+const addPhaseValuesDefinition = (parent, values) => {
+    Object.keys(values).forEach(key => {
+        const phaseValues = values[key]
+        Object.keys(phaseValues).forEach(phase => {
+            let units = phaseValues[phase].units && phaseValues[phase].units.SIUnit || "";
             if (units && units.startsWith("UnitSymbolKind_")) {
                 units = " " + units.substr(15);
             }
             if (phaseValues[phase].hasOwnProperty("cVal")) {
-                addDefinition(parent, key + " " + phase, "" + phaseValues[phase].cVal.mag.f + "∠" + phaseValues[phase].cVal.ang.f + units);
+                const value = "" + phaseValues[phase].cVal.mag.f + "∠" + phaseValues[phase].cVal.ang.f + units
+                addDefinition(parent, key + " " + phase, value);
             }
         })
     })
@@ -79,16 +97,17 @@ var addPhaseValuesDefinition = function (parent, values) {
  * table when we have new data for an object.
  * @param {object} evtData The message data that was received.
  */
-var createDeviceDefinition = function(evtData) {
-    var itemDefs = document.createElement("table");
-    var iedMrid = evtData.ied.identifiedObject.mRID;
+const createDeviceDefinition = evtData => {
+    const itemDefs = document.createElement("table");
+    const iedMrid = evtData.ied.identifiedObject.mRID;
     itemDefs.id = iedMrid + "-defs";
 
     addDefinition(itemDefs, "IED MRID", iedMrid);
 
-    var msgDate = new Date(0);
+    const msgDate = new Date(0);
     msgDate.setUTCSeconds(parseInt(evtData.readingMessageInfo.messageInfo.messageTimeStamp.seconds));
     addDefinition(itemDefs, "Message date", msgDate);
+    addConductingEquipment(itemDefs, evtData, ["generatingUnit"])
     addValuesDefinition(itemDefs, evtData.generationReading.readingMMTR);
     addPhaseValuesDefinition(itemDefs, evtData.generationReading.readingMMXU);
 
@@ -100,28 +119,28 @@ var createDeviceDefinition = function(evtData) {
  * or update an existing device.
  * @param {object} evtData The OpenFMB data that was received.
  */
-var addOrUpdate = function(evtData) {
-    var devices = document.getElementById("devices");
+const addOrUpdate = evtData => {
+    const devices = document.getElementById("devices");
 
     // Which node with the devices table do we want to add this to?
     // Get the ID of the associated IED
-    var iedMrid = evtData.ied.identifiedObject.mRID
+    const iedMrid = evtData.ied.identifiedObject.mRID
 
     // Do we have a node for this already? If not, we create it and add it now
-    var iedElem = document.getElementById(iedMrid);
-    var oldDlElem = document.getElementById(iedMrid + "-defs");
+    let iedElem = document.getElementById(iedMrid);
+    let oldDlElem = document.getElementById(iedMrid + "-defs");
     if (!iedElem) {
         // Create the data element for this item
-        var iedElem = document.createElement("h5");
+        iedElem = document.createElement("h5");
         iedElem.id = iedMrid
-        var iedHeading = document.createElement("div");
+        const iedHeading = document.createElement("div");
         iedHeading.className = "row";
-        var nameElem = document.createElement("div");
+        const nameElem = document.createElement("div");
         nameElem.textContent = iedMrid;
         nameElem.className = "seven columns";
         iedHeading.appendChild(nameElem);
 
-        var deleteElem = document.createElement("button");
+        const deleteElem = document.createElement("button");
         deleteElem.textContent = "Delete";
         deleteElem.className = "two columns";
         deleteElem.addEventListener("click", deleteDevice);
@@ -138,14 +157,14 @@ var addOrUpdate = function(evtData) {
 
     // Handle the update by creating the new definition list and then replacing
     // the one in the iedElem
-    var newDlElem = createDeviceDefinition(evtData);
+    const newDlElem = createDeviceDefinition(evtData);
     iedElem.replaceChild(newDlElem, oldDlElem)
 }
 
 /**
  * Callback to request a new device created.
  */
-var createNewDevice = function() {
+const createNewDevice = () => {
     fetch("/devices", { method: "POST" })
         .then(response => {
             console.log("Created device");
@@ -158,15 +177,15 @@ var createNewDevice = function() {
 /**
  * Callback to delete an existing device.
  */
-var deleteDevice = function(event) {
-    var iedMrid = event.target.getAttribute("data-mrid");
+const deleteDevice = event => {
+    const iedMrid = event.target.getAttribute("data-mrid");
 
     fetch("/devices/" + iedMrid, { method: "DELETE" })
         .then(response => {
             console.log("Deleted device");
             // If we are successful, then remove the node.
-            var devices = document.getElementById("devices");
-            var iedElem = document.getElementById(iedMrid);
+            const devices = document.getElementById("devices");
+            const iedElem = document.getElementById(iedMrid);
             if (iedElem) {
                 devices.removeChild(iedElem);
             }
@@ -176,14 +195,15 @@ var deleteDevice = function(event) {
         })
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
     // Subscribe to server sent events
-    var evtSource = new EventSource("/sse");
-    evtSource.onmessage = function(e) {
-        var evtData = JSON.parse(e.data);
+    const evtSource = new EventSource("/sse");
+    evtSource.onmessage = e => {
+        const evtData = JSON.parse(e.data);
         addOrUpdate(evtData);
     };
 
     // Connect the UI buttons for devices
-    document.getElementById("create-device").addEventListener("click", createNewDevice);
+    document.getElementById("create-device")
+        .addEventListener("click", createNewDevice);
 });

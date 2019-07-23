@@ -32,6 +32,8 @@ async def test_when_constructed_then_generates_update():
     assert isinstance(first[1], datetime.datetime)
     assert isinstance(first[2], object)
 
+    dev.dispose()
+
 
 @pytest.mark.asyncio
 async def test_when_constructed_generates_periodic_events():
@@ -44,3 +46,5 @@ async def test_when_constructed_generates_periodic_events():
     assert len(first_two) == 2
     # Check that the dates are not the same and in the right order
     assert first_two[0][1] < first_two[1][1]
+
+    dev.dispose()

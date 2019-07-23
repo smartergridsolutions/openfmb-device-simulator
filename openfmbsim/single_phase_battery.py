@@ -15,6 +15,9 @@
 
 from datetime import datetime
 import threading
+from typing import Iterator
+import uuid
+from openfmbsim.name_generator import make_random_name
 import commonmodule_pb2 as cm
 import generationmodule_pb2 as gm
 
@@ -30,8 +33,21 @@ class SinglePhaseRealOnlyBattery(object):
     very simple battery.
     """
 
-    def __init__(self):
-        """Construct a new instance of this battery model."""
+    def __init__(self, generating_unit_mrid: uuid.UUID = None,
+                 generating_unit_name: str = None):
+        """Construct a new instance of this battery model.
+
+        :param generating_unit_mrid: The MRID of the generating unit.
+        :param generating_unit_name: The name of the generatoring unit.
+        """
+        self.mrid = (generating_unit_mrid
+                     if generating_unit_mrid is not None
+                     else uuid.uuid4())
+
+        self.name = (generating_unit_name
+                     if generating_unit_name is not None
+                     else make_random_name())
+
         self.ph_v = 120
         self._w = 1000000
         self.hz = 60
@@ -42,9 +58,20 @@ class SinglePhaseRealOnlyBattery(object):
 
         self.lock = threading.Lock()
 
+    def device_mrid(self) -> uuid.UUID:
+        """Get the ID of the underlying device."""
+        return self.mrid
+
+    def control_mrids(self) -> Iterator[uuid.UUID]:
+        """Get the MRIDs of the controls in the simulated device."""
+        yield from ()
+
     def to_profiles(self):
         """Get all of the profiles that this generates."""
         gp = gm.GenerationReadingProfile()
+        equipment = gp.generatingUnit.conductingEquipment
+        equipment.mRID = str(self.mrid)
+        equipment.namedObject.name.value = self.name
         gp.generationReading.CopyFrom(self.to_generation_reading())
         yield gp
 

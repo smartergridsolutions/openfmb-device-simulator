@@ -13,7 +13,17 @@
 # limitations under the License.
 """Tests of the simulated single phase battery module."""
 
+from uuid import UUID
 from openfmbsim.single_phase_battery import SinglePhaseRealOnlyBattery
+
+
+def test_to_profiles():
+    uuid_val = "12345678-1234-5678-1234-567812345678"
+    sph = SinglePhaseRealOnlyBattery(UUID(uuid_val))
+    profiles = list(sph.to_profiles())
+
+    assert len(profiles) == 1
+    assert profiles[0].generatingUnit.conductingEquipment.mRID == uuid_val
 
 
 def test_to_generation_reading_when_not_set_power():

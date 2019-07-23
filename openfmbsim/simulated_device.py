@@ -18,6 +18,7 @@ from datetime import timedelta, datetime
 import logging
 import rx
 import threading
+from typing import Iterator
 import uuid
 import commonmodule_pb2 as cm
 
@@ -63,14 +64,14 @@ def write_ied_info(ied, uuid):
 class SimulatedDevice(object):
     """Represents a device that periodically publishes profile information."""
 
-    def __init__(self, device_id: str, model,
+    def __init__(self, ied_id: uuid.UUID, model,
                  rate: timedelta = timedelta(seconds=1)):
         """Create a new simulated device.
 
-        :param id: The MRID of the device.
+        :param ied_id: The MRID of the associated IED device.
         :param rate: The rate at which the device should publish updates.
         """
-        self.id = device_id
+        self.id = ied_id
         self.subject = rx.subjects.Subject()
         self.event_loop = asyncio.get_event_loop()
         self.rate = rate
@@ -114,7 +115,23 @@ class SimulatedDevice(object):
                 next_run = self.event_loop.time() + self.rate.total_seconds()
                 self.event_loop.call_at(next_run, self.publish_profiles, self)
 
+    def update_profile(self, profile):
+        """Update this with the information from the control profile.
+
+        :param profile: The control profile with the update.
+        """
+        self.model.update_profile(profile)
+
     def dispose(self):
         """Terminate the device so it stops publishing."""
         with self.lock:
             self.done = True
+
+    @property
+    def device_mrid(self) -> uuid.UUID:
+        """Get the ID of the underlying device."""
+        return self.model.mrid
+
+    def control_mrids(self) -> Iterator[uuid.UUID]:
+        """Get the MRIDs of the controls in the simulated device."""
+        yield from self.model.control_mrids

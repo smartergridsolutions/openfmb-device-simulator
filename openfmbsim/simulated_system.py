@@ -17,6 +17,8 @@ import uuid
 import logging
 import rx
 from openfmbsim.simulated_device import SimulatedDevice
+import generationmodule_pb2 as gm
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -117,5 +119,26 @@ class SimulatedSystem(object):
         return found
 
     def update_profile(self, profile):
-        """Handle a control request encoded as a profile for a model."""
-        LOGGER.error("Not implement control request")
+        """Handle a control request encoded as a profile for a model.
+
+        :param profile: The profile describing the control update.
+        """
+        if isinstance(profile, gm.GenerationControlProfile):
+            mrid_str = profile.generatingUnit.conductingEquipment.mRID
+        else:
+            mrid_str = ""
+
+        try:
+            mrid = uuid.UUID(mrid_str)
+        except ValueError:
+            LOGGER.error("Profile MRID %s is not valid UUID.", mrid_str)
+            return
+
+        # Find the device that that mrid
+        device = next((x for x in self._devices if x.device_mrid == mrid),
+                      None)
+
+        if device is not None:
+            device.update_profile(profile)
+        else:
+            LOGGER.error("Device MRID %s does not exist.", mrid_str)

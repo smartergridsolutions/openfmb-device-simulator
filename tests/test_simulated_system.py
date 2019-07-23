@@ -14,8 +14,10 @@
 """Tests of the simulated system module."""
 
 import uuid
+from unittest.mock import Mock
 from openfmbsim.simulated_system import SimulatedSystem
 from openfmbsim.single_phase_battery import SinglePhaseRealOnlyBattery
+import generationmodule_pb2 as gm
 
 
 def test_remove_model_when_no_devices():
@@ -33,7 +35,24 @@ def test_remove_model_when_exists():
     assert len(system.subscriptions) == 0
 
 
-def test_update_profile_returns():
+def test_update_profile_when_invalid_mrid():
     # We have this to ensure that we are getting good test coverage.
     system = SimulatedSystem()
-    system.update_profile(uuid.uuid1())
+
+    profile = gm.GenerationControlProfile()
+    system.update_profile(profile)
+
+
+def test_update_profile_when_mrid_matches_device():
+    # We have this to ensure that we are getting good test coverage.
+    device_mrid = uuid.uuid4()
+    battery = Mock(mrid=device_mrid)
+
+    system = SimulatedSystem()
+    system.add_model(battery)
+
+    profile = gm.GenerationControlProfile()
+    profile.generatingUnit.conductingEquipment.mRID = str(device_mrid)
+    system.update_profile(profile)
+
+    battery.update_profile.assert_called_once_with(profile)
