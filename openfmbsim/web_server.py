@@ -145,7 +145,7 @@ def create_web_server(host: str, port: int, loop, system):
     """
     LOGGER.info("Starting web server...")
     app.system = system
-    system.subscribe(lambda profiles: publish_async(profiles))
+    system.subscribe(publish_async)
 
     # This does not return until canceled
     app.run(host, port=port, loop=loop)

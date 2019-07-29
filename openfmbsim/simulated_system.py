@@ -13,9 +13,9 @@
 # limitations under the License.
 """Aggregates all items in the system to provide a simple interface."""
 
-import uuid
 import logging
 import rx
+import uuid
 from openfmbsim.simulated_device import SimulatedDevice
 import generationmodule_pb2 as gm
 
@@ -76,9 +76,11 @@ class SimulatedSystem(object):
         """
         ied_mrid = uuid.uuid4()
         device = SimulatedDevice(ied_mrid, model)
-        self.subscriptions[ied_mrid] = device.observable.subscribe(
-            lambda profile: self.publish(profile)
-        )
+
+        def publish(profile):
+            self.publish(profile)
+        self.subscriptions[ied_mrid] = device.observable.subscribe(publish)
+
         self._devices.append(device)
         LOGGER.info("Added device %s - total number of devices %d",
                     device.id, len(self._devices))

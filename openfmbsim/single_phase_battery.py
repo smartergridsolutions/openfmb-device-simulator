@@ -64,7 +64,7 @@ class SinglePhaseRealOnlyBattery(object):
 
     def control_mrids(self) -> Iterator[uuid.UUID]:
         """Get the MRIDs of the controls in the simulated device."""
-        yield from ()
+        return []
 
     def to_profiles(self):
         """Get all of the profiles that this generates."""
