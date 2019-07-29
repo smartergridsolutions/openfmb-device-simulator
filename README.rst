@@ -1,6 +1,10 @@
 OpenFMB Device Simulator
 ========================
 
+.. image:: https://badges.gitter.im/smartergridsolutions/openfmb-device-simulator.svg
+   :alt: Join the chat at https://gitter.im/smartergridsolutions/openfmb-device-simulator
+   :target: https://gitter.im/smartergridsolutions/openfmb-device-simulator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 OpenFMB Device Simulator is a simple simulator that publishes information using
 NATS messaging about simulated devices and accepts control requests for those
 devices. The intended purpose of this simulator is to enable testing with other
