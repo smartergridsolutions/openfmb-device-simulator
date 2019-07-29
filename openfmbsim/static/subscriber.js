@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
- /* eslint-disable detect-object-injection */
+/* eslint-disable detect-object-injection */
 
 /**
  * Add a new definition into the specified table.
@@ -43,13 +43,13 @@ const addDefinition = (parent, name, value) => {
  * @param {array} keys The list of keys to look for conducting equipment.
  */
 const addConductingEquipment = (parent, profile, keys) => {
-    Object.keys(profile)
-        .filter((key) => keys.includes(key))
-        .forEach((key) => {
+    Object.entries(profile)
+        .filter((key, value) => keys.includes(key))
+        .forEach((key, value) => {
             addDefinition(parent, "Conducting Equipment Name",
-                          profile[key].conductingEquipment.namedObject.name);
+                          value.conductingEquipment.namedObject.name);
             addDefinition(parent, "Conducting Equipment MRID",
-                          profile[key].conductingEquipment.mRID);
+                          value.conductingEquipment.mRID);
         })
 }
 
@@ -60,13 +60,13 @@ const addConductingEquipment = (parent, profile, keys) => {
  *                        objects following the normal OpenFMB structure.
  */
 const addValuesDefinition = (parent, values) => {
-    Object.keys(values).forEach((key) => {
-        let units = values[key].units.value;
+    Object.entries(values).forEach((key, value) => {
+        let units = value.units.value;
         if (units && units.startsWith("UnitSymbolKind_")) {
             units = " " + units.substr(15);
         }
         // If the value is the default, then it is omitted
-        const value = values[key].actVal || 0;
+        const value = value.actVal || 0;
         addDefinition(parent, key, "" + value + units);
     })
 }
@@ -78,15 +78,14 @@ const addValuesDefinition = (parent, values) => {
  * @param {object} values Object of phase values to insert.
  */
 const addPhaseValuesDefinition = (parent, values) => {
-    Object.keys(values).forEach(key => {
-        const phaseValues = values[key];
-        Object.keys(phaseValues).forEach((phase) => {
-            let units = phaseValues[phase].units && phaseValues[phase].units.SIUnit || "";
+    Object.entries(values).forEach((key, phaseValues) => {
+        Object.entries(phaseValues).forEach((phase, value) => {
+            let units = value.units && value.units.SIUnit || "";
             if (units && units.startsWith("UnitSymbolKind_")) {
                 units = " " + units.substr(15);
             }
-            if (phaseValues[phase].hasOwnProperty("cVal")) {
-                const value = "" + phaseValues[phase].cVal.mag.f + "∠" + phaseValues[phase].cVal.ang.f + units;
+            if (value.hasOwnProperty("cVal")) {
+                const value = "" + value.cVal.mag.f + "∠" + value.cVal.ang.f + units;
                 addDefinition(parent, key + " " + phase, value);
             }
         })
@@ -121,23 +120,20 @@ const createDeviceDefinition = (evtData) => {
  */
 const createNewDevice = () => {
     fetch("/devices", { method: "POST" })
-        .then(() => {
-            console.log("Created device");
-        })
-        .catch(error => {
-            console.log(error)
-        })
+        .catch((error) => {
+            const errors = document.getElementById("errors");
+            errors.appendChild(document.createTextNode(error));
+        });
 }
 
 /**
  * Callback to delete an existing device.
  */
-const deleteDevice = event => {
+const deleteDevice = (event) => {
     const iedMrid = event.target.getAttribute("data-mrid");
 
     fetch("/devices/" + iedMrid, { method: "DELETE" })
         .then(() => {
-            console.log("Deleted device");
             // If we are successful, then remove the node.
             const devices = document.getElementById("devices");
             const iedElem = document.getElementById(iedMrid);
@@ -145,8 +141,9 @@ const deleteDevice = event => {
                 devices.removeChild(iedElem);
             }
         })
-        .catch(error => {
-            console.log(error);
+        .catch((error) => {
+            const errors = document.getElementById("errors");
+            errors.appendChild(document.createTextNode(error));
         });
 }
 

@@ -99,7 +99,9 @@ class NatsPublisher():
         self.event_loop = event_loop
 
         # Subscribe to the stream of published profiles
-        self.system.subscribe(lambda profiles: self.publish_async(profiles))
+        def publish(profiles):
+            self.publish_async(profiles)
+        self.system.subscribe(publish)
 
     async def start(self):
         """Start the publisher."""
