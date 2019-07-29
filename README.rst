@@ -1,6 +1,14 @@
 OpenFMB Device Simulator
 ========================
 
+.. image:: https://travis-ci.org/smartergridsolutions/openfmb-device-simulator.svg?branch=master
+    :alt: View build status on Travis CI
+    :target: https://travis-ci.org/smartergridsolutions/openfmb-device-simulator
+
+.. image:: https://api.codacy.com/project/badge/Grade/3182844be1e6487d88af74d8f22e3007
+   :alt: View code quality on Codacy
+   :target: https://www.codacy.com/app/garretfick/openfmb-device-simulator?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=smartergridsolutions/openfmb-device-simulator&amp;utm_campaign=Badge_Grade
+
 .. image:: https://badges.gitter.im/smartergridsolutions/openfmb-device-simulator.svg
    :alt: Join the chat at https://gitter.im/smartergridsolutions/openfmb-device-simulator
    :target: https://gitter.im/smartergridsolutions/openfmb-device-simulator?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge

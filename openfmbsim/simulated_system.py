@@ -39,7 +39,8 @@ class SimulatedSystem(object):
     def dispose(self):
         """Stop the simulated system, shutting down all devices."""
         LOGGER.debug("Unsubscribing by system from models")
-        [s.dispose() for s in self.subscriptions.values()]
+        for s in self.subscriptions.values():
+            s.dispose()
         self.subscriptions = []
 
     def subscribe(self, cb):
