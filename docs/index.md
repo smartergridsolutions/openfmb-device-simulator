@@ -94,7 +94,7 @@ docker run -it openfmb-device-simulator "--help"
 
 #### Build and Start the Simulator and NATS
 
-Execute the following in a terminal if you do not have an instande of NATS
+Execute the following in a terminal if you do not have an instance of NATS
 running.
 
 ```sh
@@ -114,5 +114,13 @@ You can use a 3rd party tool such at
 statistics. You can also interact with the simulator via the included web
 interface by opening `localhost:5000` on your local machine.
 
+💡 *TIP* The included web server is not intended to replace OpenFMB messaging.
+Rather, it enables capabilities to add or remove devices that are not messages
+defined by the OpenFMB standard. However, it also includes basic visualization
+for the defined devices.
+
 ## Supported Messages
 
+The simulator can model devices with the following profiles:
+
+* GenerationReadingProfile
