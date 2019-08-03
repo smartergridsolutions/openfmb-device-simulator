@@ -20,22 +20,9 @@ import rx
 import threading
 from typing import Iterator
 import uuid
-import commonmodule_pb2 as cm
+from openfmbsim.message import write_timestamp
 
 LOGGER = logging.getLogger(__name__)
-
-
-def write_timestamp(ts, now):
-    """Set fields for the given TimeStamp structure based on current time."""
-    fractional_seconds = now.timestamp()
-    seconds = int(fractional_seconds)
-    ts.fraction = int((fractional_seconds - seconds) * 4294967295)
-    ts.seconds = seconds
-    ts.tq.clockFailure = False
-    ts.tq.clockNotSynchronized = False
-    ts.tq.leapSecondsKnown = True
-
-    ts.tq.timeAccuracy = cm.TimeAccuracyKind.TimeAccuracyKind_unspecified
 
 
 def write_message_info(message_info, uuid, now):

@@ -17,9 +17,36 @@ from datetime import datetime
 import threading
 from typing import Iterator
 import uuid
+from openfmbsim.message import write_timestamp
 from openfmbsim.name_generator import make_random_name
 import commonmodule_pb2 as cm
 import generationmodule_pb2 as gm
+
+
+def set_cmv(cmv, mag, ang, unit, now: datetime):
+    """Set the values in the specified CMV structure.
+
+    :param mag: The value's magnitude.
+    :param ang: The value's angle.
+    :param unit: The value's unit.
+    :param now: The timestamp for the value.
+    """
+    cmv.cVal.mag.f.value = mag
+    cmv.cVal.ang.f.value = ang
+    cmv.units.SIUnit = unit
+    write_timestamp(cmv.t, now)
+
+
+def set_bcr(bcr, val, unit, now: datetime):
+    """Set the values in the specified BCR structure.
+
+    :param val: The numeric value.
+    :param unit: The value's unit.
+    :param now: The timestamp for the value.
+    """
+    bcr.actVal = int(val)
+    bcr.units.value = unit
+    write_timestamp(bcr.t, now)
 
 
 class SinglePhaseRealOnlyBattery(object):
@@ -58,6 +85,7 @@ class SinglePhaseRealOnlyBattery(object):
 
         self.lock = threading.Lock()
 
+    @property
     def device_mrid(self) -> uuid.UUID:
         """Get the ID of the underlying device."""
         return self.mrid
@@ -88,58 +116,38 @@ class SinglePhaseRealOnlyBattery(object):
 
     def to_mmxu(self, mmxu):
         """Write the MMXU data into the specified structure."""
-        mmxu.A.phsA.cVal.mag.f.value = self.i_mag
-        mmxu.A.phsA.cVal.ang.f.value = 0
-        mmxu.A.phsA.units.SIUnit = cm.UnitSymbolKind.UnitSymbolKind_Amp
+        now = datetime.now()
+        sk = cm.UnitSymbolKind
+        set_cmv(mmxu.A.phsA, self.i_mag, 0, sk.UnitSymbolKind_Amp, now)
 
         mmxu.Hz.mag.f.value = self.hz
-        mmxu.Hz.units.SIUnit = cm.UnitSymbolKind.UnitSymbolKind_Hz
+        mmxu.Hz.units.SIUnit = sk.UnitSymbolKind_Hz
 
-        mmxu.PF.phsA.cVal.mag.f.value = 1
-        mmxu.PF.phsA.cVal.ang.f.value = 0
-        mmxu.PF.phsA.units.SIUnit = cm.UnitSymbolKind.UnitSymbolKind_none
+        set_cmv(mmxu.PF.phsA, 1, 0, sk.UnitSymbolKind_none, now)
 
         mmxu.PFSign.setVal = 0
 
-        mmxu.PhV.phsA.cVal.mag.f.value = self.ph_v
-        mmxu.PhV.phsA.cVal.ang.f.value = 0
-        mmxu.PhV.phsA.units.SIUnit = cm.UnitSymbolKind.UnitSymbolKind_V
-
-        mmxu.VA.phsA.cVal.mag.f.value = self.va
-        mmxu.VA.phsA.cVal.ang.f.value = 0
-        mmxu.VA.phsA.units.SIUnit = cm.UnitSymbolKind.UnitSymbolKind_VA
-
-        mmxu.VAr.phsA.cVal.mag.f.value = 0
-        mmxu.VAr.phsA.cVal.ang.f.value = 0
-        mmxu.VAr.phsA.units.SIUnit = cm.UnitSymbolKind.UnitSymbolKind_VAr
-
-        mmxu.W.phsA.cVal.mag.f.value = self.w
-        mmxu.W.phsA.cVal.ang.f.value = 0
-        mmxu.W.phsA.units.SIUnit = cm.UnitSymbolKind.UnitSymbolKind_W
+        set_cmv(mmxu.PhV.phsA, self.ph_v, 0, sk.UnitSymbolKind_V, now)
+        set_cmv(mmxu.VA.phsA, self.va, 0, sk.UnitSymbolKind_VA, now)
+        set_cmv(mmxu.VAr.phsA, 0, 0, sk.UnitSymbolKind_VAr, now)
+        set_cmv(mmxu.W.phsA, self.w, 0, sk.UnitSymbolKind_W, now)
 
     def to_mmtr(self, mmtr):
         """Write the MMTR data into the specified structure."""
-        mmtr.DmdWh.actVal = int(self.dmd_wh)
-        mmtr.DmdWh.units.value = cm.UnitSymbolKind.UnitSymbolKind_Wh
-        mmtr.DmdVArh.actVal = 0
-        mmtr.DmdVArh.units.value = cm.UnitSymbolKind.UnitSymbolKind_VArh
-        mmtr.DmdVAh.actVal = int(self.dmd_wh)
-        mmtr.DmdVAh.units.value = cm.UnitSymbolKind.UnitSymbolKind_VAh
+        now = datetime.now()
+        sk = cm.UnitSymbolKind
+        set_bcr(mmtr.DmdWh, self.dmd_wh, sk.UnitSymbolKind_Wh, now)
+        set_bcr(mmtr.DmdVArh, 0, sk.UnitSymbolKind_VArh, now)
+        set_bcr(mmtr.DmdVAh, self.dmd_wh, sk.UnitSymbolKind_VAh, now)
 
-        mmtr.SupWh.actVal = int(self.sup_wh)
-        mmtr.SupWh.units.value = cm.UnitSymbolKind.UnitSymbolKind_Wh
-        mmtr.SupVArh.actVal = 0
-        mmtr.SupVArh.units.value = cm.UnitSymbolKind.UnitSymbolKind_VArh
-        mmtr.SupVAh.actVal = int(self.sup_wh)
-        mmtr.SupVAh.units.value = cm.UnitSymbolKind.UnitSymbolKind_VAh
+        set_bcr(mmtr.SupWh, self.sup_wh, sk.UnitSymbolKind_Wh, now)
+        set_bcr(mmtr.SupVArh, 0, sk.UnitSymbolKind_VArh, now)
+        set_bcr(mmtr.SupVAh, self.sup_wh, sk.UnitSymbolKind_VAh, now)
 
-        total_wh = int(self.sup_wh - self.dmd_wh)
-        mmtr.TotWh.actVal = total_wh
-        mmtr.TotWh.units.value = cm.UnitSymbolKind.UnitSymbolKind_Wh
-        mmtr.TotVArh.actVal = 0
-        mmtr.TotVArh.units.value = cm.UnitSymbolKind.UnitSymbolKind_VArh
-        mmtr.TotVAh.actVal = total_wh
-        mmtr.TotVAh.units.value = cm.UnitSymbolKind.UnitSymbolKind_VAh
+        total_wh = self.sup_wh - self.dmd_wh
+        set_bcr(mmtr.TotWh, total_wh, sk.UnitSymbolKind_Wh, now)
+        set_bcr(mmtr.TotVArh, 0, sk.UnitSymbolKind_VArh, now)
+        set_bcr(mmtr.TotVAh, total_wh, sk.UnitSymbolKind_VAh, now)
 
         return mmtr
 

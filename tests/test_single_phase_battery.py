@@ -17,6 +17,18 @@ from uuid import UUID
 from openfmbsim.single_phase_battery import SinglePhaseRealOnlyBattery
 
 
+def test_device_mrid_automatically_creates():
+    sph = SinglePhaseRealOnlyBattery()
+
+    assert sph.device_mrid is not None
+
+
+def test_control_mrids_default_is_empty():
+    sph = SinglePhaseRealOnlyBattery()
+
+    assert len(sph.control_mrids()) == 0
+
+
 def test_to_profiles():
     uuid_val = "12345678-1234-5678-1234-567812345678"
     sph = SinglePhaseRealOnlyBattery(UUID(uuid_val))

@@ -55,7 +55,7 @@ class SimulatedSystem(object):
         self.subjects.append(subject)
 
         def unsubscribe():
-            disposable()
+            disposable.dispose()
             self.subjects.remove(subject)
 
         return unsubscribe

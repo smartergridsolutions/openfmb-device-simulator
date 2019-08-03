@@ -56,3 +56,17 @@ def test_update_profile_when_mrid_matches_device():
     system.update_profile(profile)
 
     battery.update_profile.assert_called_once_with(profile)
+
+
+def test_subscribe_returns_disposable():
+    system = SimulatedSystem()
+
+    # Adding a subscriber adds it to the list of subjects
+    def subscriber(profile):
+        pass
+    disposable = system.subscribe(cb=subscriber)
+    assert len(system.subjects) == 1
+
+    # Disposing of it removes the item
+    disposable()
+    assert len(system.subjects) == 0
