@@ -52,7 +52,8 @@ async def test_index_returns_page(test_app):
 @pytest.mark.asyncio
 async def test_create_returns_204(test_app):
     test_client = test_app.test_client()
-    response = await test_client.post("/devices")
+    data = {"type": "generator"}
+    response = await test_client.post("/devices", json=data)
     assert response.status_code == 204
     assert len(test_app.system.devices) == 1
 

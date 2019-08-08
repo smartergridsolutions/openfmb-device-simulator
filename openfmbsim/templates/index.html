@@ -22,17 +22,31 @@
     </head>
     <body>
         <div class="container">
-            <h1>OpenFMB Device Simulator</h1>
+            <div id="app-container">
+                <h1>OpenFMB Device Simulator</h1>
 
-            <button id="create-device">Create device</button>
+                <form id="create-container">
+                    <div class="row">
+                        <div class="six columns">
+                            <label for="deviceType">Device Type</label>
+                            <select name="deviceType">
+                                <option value="generator">Generator</option>
+                                <option value="meter">Meter</option>
+                            </select>
+                            <input id="submit-device" class="button-primary" type="submit" value="Create"/>
+                        </div>
+                    </div>
+                </form>
 
-            <div id="errors">
+                <div id="errors">
+                </div>
+
+                <hr/>
+
+                <div id="devices">
+                </div>
             </div>
 
-            <hr/>
-
-            <div id="devices">
-            </div>
         </div>
 
         <script type="text/javascript" src="{{ url_for('static', filename='subscriber.js') }}"></script>

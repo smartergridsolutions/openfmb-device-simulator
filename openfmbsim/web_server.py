@@ -18,8 +18,9 @@ import logging
 import threading
 import uuid
 from google.protobuf.json_format import MessageToJson
-from quart import Quart, render_template, make_response
-from openfmbsim.single_phase_battery import SinglePhaseRealOnlyBattery
+from quart import Quart, render_template, make_response, request
+from .devices.single_phase_generator import SinglePhaseGenerator
+from .devices.single_phase_meter import SinglePhaseMeter
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,8 +62,22 @@ async def create():
 
     We currently do not allow the caller to specify anything about the device.
     """
+    data = await request.json
+    device_type = data["type"]
+
+    types = {
+        "generator": SinglePhaseGenerator,
+        "meter": SinglePhaseMeter
+    }
+
+    constructor = types.get(device_type, None)
+
+    if constructor is None:
+        return "Invalid type", 400
+
+    device = constructor()
     LOGGER.info("Create a new device.")
-    app.system.add_model(SinglePhaseRealOnlyBattery())
+    app.system.add_model(device)
     return "Created", 204
 
 
@@ -133,7 +148,7 @@ def publish_async(profile):
 @app.before_serving
 def before_serving():
     """Create the system just before serving when everything is ready."""
-    app.system.add_model(SinglePhaseRealOnlyBattery())
+    app.system.add_model(SinglePhaseGenerator())
 
 
 def create_web_server(host: str, port: int, loop, system):

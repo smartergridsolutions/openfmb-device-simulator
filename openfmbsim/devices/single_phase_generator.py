@@ -14,42 +14,14 @@
 """Simple simulator for a battery generation unit."""
 
 from datetime import datetime
-import threading
-from typing import Iterator
 import uuid
-from openfmbsim.message import write_timestamp
-from openfmbsim.name_generator import make_random_name
+from .message import set_bcr, set_cmv
+from .conducting_equipment import ConductingEquipment
 import commonmodule_pb2 as cm
 import generationmodule_pb2 as gm
 
 
-def set_cmv(cmv, mag, ang, unit, now: datetime):
-    """Set the values in the specified CMV structure.
-
-    :param mag: The value's magnitude.
-    :param ang: The value's angle.
-    :param unit: The value's unit.
-    :param now: The timestamp for the value.
-    """
-    cmv.cVal.mag.f.value = mag
-    cmv.cVal.ang.f.value = ang
-    cmv.units.SIUnit = unit
-    write_timestamp(cmv.t, now)
-
-
-def set_bcr(bcr, val, unit, now: datetime):
-    """Set the values in the specified BCR structure.
-
-    :param val: The numeric value.
-    :param unit: The value's unit.
-    :param now: The timestamp for the value.
-    """
-    bcr.actVal = int(val)
-    bcr.units.value = unit
-    write_timestamp(bcr.t, now)
-
-
-class SinglePhaseRealOnlyBattery(object):
+class SinglePhaseGenerator(ConductingEquipment):
     """A simulated single phase battery.
 
     This is intended to simulate a battery that might be installed in a split
@@ -60,20 +32,14 @@ class SinglePhaseRealOnlyBattery(object):
     very simple battery.
     """
 
-    def __init__(self, generating_unit_mrid: uuid.UUID = None,
-                 generating_unit_name: str = None):
-        """Construct a new instance of this battery model.
+    def __init__(self, cond_equip_mrid: uuid.UUID = None,
+                 cond_equip_name: str = None):
+        """Construct a new instance of this meter model.
 
-        :param generating_unit_mrid: The MRID of the generating unit.
-        :param generating_unit_name: The name of the generatoring unit.
+        :param cond_equip_mrid: The MRID of the conducting unit.
+        :param cond_equip_name: The name of the conducting unit.
         """
-        self.mrid = (generating_unit_mrid
-                     if generating_unit_mrid is not None
-                     else uuid.uuid4())
-
-        self.name = (generating_unit_name
-                     if generating_unit_name is not None
-                     else make_random_name())
+        super().__init__(cond_equip_mrid, cond_equip_name)
 
         self.ph_v = 120
         self._w = 1000000
@@ -82,17 +48,6 @@ class SinglePhaseRealOnlyBattery(object):
         self.last_update = datetime.utcnow()
         self.dmd_wh = 0
         self.sup_wh = 0
-
-        self.lock = threading.Lock()
-
-    @property
-    def device_mrid(self) -> uuid.UUID:
-        """Get the ID of the underlying device."""
-        return self.mrid
-
-    def control_mrids(self) -> Iterator[uuid.UUID]:
-        """Get the MRIDs of the controls in the simulated device."""
-        return []
 
     def to_profiles(self):
         """Get all of the profiles that this generates."""

@@ -16,7 +16,7 @@
 import uuid
 from unittest.mock import Mock
 from openfmbsim.simulated_system import SimulatedSystem
-from openfmbsim.single_phase_battery import SinglePhaseRealOnlyBattery
+from openfmbsim.devices.single_phase_generator import SinglePhaseGenerator
 import generationmodule_pb2 as gm
 
 
@@ -27,7 +27,7 @@ def test_remove_model_when_no_devices():
 
 def test_remove_model_when_exists():
     system = SimulatedSystem()
-    battery = SinglePhaseRealOnlyBattery()
+    battery = SinglePhaseGenerator()
     uuid = system.add_model(battery)
     assert system.remove_model(uuid)
 

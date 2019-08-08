@@ -60,14 +60,17 @@ const addConductingEquipment = (parent, profile, keys) => {
  *                        objects following the normal OpenFMB structure.
  */
 const addValuesDefinition = (parent, values) => {
-    Object.entries(values).forEach((key, value) => {
-        let units = value.units.value;
+    Object.entries(values).forEach((entry) => {
+        const key = entry[0]
+        const value = entry[1]
+
+        let units = value && value.units && value.units.value;
         if (units && units.startsWith("UnitSymbolKind_")) {
             units = " " + units.substr(15);
         }
         // If the value is the default, then it is omitted
-        const value = value.actVal || 0;
-        addDefinition(parent, key, "" + value + units);
+        const actVal = value.actVal || 0;
+        addDefinition(parent, key, "" + actVal + units);
     })
 }
 
@@ -108,9 +111,11 @@ const createDeviceDefinition = (evtData) => {
     const msgDate = new Date(0);
     msgDate.setUTCSeconds(parseInt(evtData.readingMessageInfo.messageInfo.messageTimeStamp.seconds, 10));
     addDefinition(itemDefs, "Message date", msgDate);
-    addConductingEquipment(itemDefs, evtData, ["generatingUnit"]);
-    addValuesDefinition(itemDefs, evtData.generationReading.readingMMTR);
-    addPhaseValuesDefinition(itemDefs, evtData.generationReading.readingMMXU);
+    addConductingEquipment(itemDefs, evtData, ["generatingUnit", "meter"]);
+
+    const owner = evtData.generationReading || evtData.meterReading;
+    addValuesDefinition(itemDefs, owner && owner.readingMMTR);
+    addPhaseValuesDefinition(itemDefs, owner && owner.readingMMXU);
 
     return itemDefs;
 }
@@ -118,8 +123,18 @@ const createDeviceDefinition = (evtData) => {
 /**
  * Callback to request a new device created.
  */
-const createNewDevice = () => {
-    fetch("/devices", { method: "POST" })
+const postNewDevice = (event) => {
+    // What is the device type that was added?
+    const type = event.target.form.elements.deviceType.value;
+    const data = { type };
+
+    // Create the device
+    fetch("/devices", { method: "POST",
+                        body: JSON.stringify(data),
+                        headers: {
+                          'Content-Type': 'application/json'
+                        }
+        })
         .catch((error) => {
             const errors = document.getElementById("errors");
             errors.appendChild(document.createTextNode(error));
@@ -203,6 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Connect the UI buttons for devices
-    document.getElementById("create-device")
-        .addEventListener("click", createNewDevice);
+    document.getElementById("submit-device")
+        .addEventListener("click", postNewDevice);
 });
