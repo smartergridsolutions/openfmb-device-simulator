@@ -61,8 +61,8 @@ const addConductingEquipment = (parent, profile, keys) => {
  */
 const addValuesDefinition = (parent, values) => {
     Object.entries(values).forEach((entry) => {
-        const key = entry[0]
-        const value = entry[1]
+        const key = entry[0];
+        const value = entry[1];
 
         let units = value && value.units && value.units.value;
         if (units && units.startsWith("UnitSymbolKind_")) {
@@ -132,7 +132,7 @@ const postNewDevice = (event) => {
     fetch("/devices", { method: "POST",
                         body: JSON.stringify(data),
                         headers: {
-                          'Content-Type': 'application/json'
+                          "Content-Type": "application/json"
                         }
         })
         .catch((error) => {
