@@ -107,12 +107,19 @@ docker-compose up
 ### Interact
 
 Once the simulator is running following the steps above, it will automatically
-being to publish messages to NATS.
+being to publish messages to NATS using the default generator reading profile.
 
 You can use a 3rd party tool such at
 [nats-top](https://github.com/nats-io/nats-top) to observe message delivery
-statistics. You can also interact with the simulator via the included web
-interface by opening `localhost:5000` on your local machine.
+statistics. 
+
+### Control
+
+The simulator includes a simple web interface for creating and deleting
+simulated models at runtime. You can also interact with the simulator via the
+included web interface by opening `localhost:5000` on your local machine.
+
+![](web-front-end.png)
 
 💡 *TIP* The included web server is not intended to replace OpenFMB messaging.
 Rather, it enables capabilities to add or remove devices that are not messages
@@ -124,3 +131,4 @@ for the defined devices.
 The simulator can model devices with the following profiles:
 
 * GenerationReadingProfile
+* MeterReadingProfile

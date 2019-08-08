@@ -17,12 +17,12 @@ import datetime
 import pytest
 import rx
 from openfmbsim.simulated_device import SimulatedDevice
-from openfmbsim.single_phase_battery import SinglePhaseRealOnlyBattery
+from openfmbsim.devices.single_phase_generator import SinglePhaseGenerator
 
 
 @pytest.mark.asyncio
 async def test_when_constructed_then_generates_update():
-    model = SinglePhaseRealOnlyBattery()
+    model = SinglePhaseGenerator()
     dev = SimulatedDevice("ID", model)
 
     first = await rx.Observable.to_future((dev.observable.first()))
@@ -37,7 +37,7 @@ async def test_when_constructed_then_generates_update():
 
 @pytest.mark.asyncio
 async def test_when_constructed_generates_periodic_events():
-    model = SinglePhaseRealOnlyBattery()
+    model = SinglePhaseGenerator()
     dev = SimulatedDevice("ID", model)
 
     item = dev.observable.pairwise().first()

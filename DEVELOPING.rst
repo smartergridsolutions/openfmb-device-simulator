@@ -8,7 +8,6 @@ Prerequisites
 
 You need to have the following installed on your development machine:
 
-* Python 3.6
 * Python 3.7
 * NATS 2.x
 
@@ -30,18 +29,19 @@ Once you have Python on your path:
 
 #. Run NATS 2.x. The application expects to be able to communicate with NATS
    on localhost. If you don't already have NATS and you do have Docker, you
-   can start NATS through docker-compose:
+   can start NATS through docker:
 
    .. code-block:: shell
 
-     cd env
-     docker-compose up
+     cd env/nats
+     docker build -t nats .
+     docker run -it nats
 
 #. Run the application from the shell.
 
    .. code-block:: shell
 
-     .\bin\run.cmd
+     python -m openfmbsim.server
 
 #. Listen to messages from the simulator on NATS.
 
