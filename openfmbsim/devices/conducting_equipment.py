@@ -15,7 +15,6 @@
 
 from datetime import datetime
 import threading
-from typing import Iterator
 import uuid
 from ..name_generator import make_random_name
 
@@ -45,7 +44,3 @@ class ConductingEquipment(object):
     def device_mrid(self) -> uuid.UUID:
         """Get the ID of the underlying device."""
         return self.mrid
-
-    def control_mrids(self) -> Iterator[uuid.UUID]:
-        """Get the MRIDs of the controls in the simulated device."""
-        return []

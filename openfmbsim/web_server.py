@@ -21,6 +21,7 @@ from google.protobuf.json_format import MessageToJson
 from quart import Quart, render_template, make_response, request
 from .devices.single_phase_generator import SinglePhaseGenerator
 from .devices.single_phase_meter import SinglePhaseMeter
+from .devices.single_phase_recloser import SinglePhaseRecloser
 
 LOGGER = logging.getLogger(__name__)
 
@@ -67,7 +68,8 @@ async def create():
 
     types = {
         "generator": SinglePhaseGenerator,
-        "meter": SinglePhaseMeter
+        "meter": SinglePhaseMeter,
+        "recloser": SinglePhaseRecloser,
     }
 
     constructor = types.get(device_type, None)
