@@ -17,19 +17,25 @@ import asyncio
 import functools
 import logging
 from nats.aio.client import Client as Nats
+import reclosermodule_pb2 as rm
 import generationmodule_pb2 as gm
 
 LOGGER = logging.getLogger(__name__)
 
 # The types from protobuf that we subscribe to.
 SUBSCRIBE_PROFILES_TYPES = [
+    rm.RecloserControlProfile,
     gm.GenerationControlProfile
 ]
 
 
-def profile_to_subject(profile):
-    """Convert the profile to it's topic as per RMQ.26.6.5.2."""
-    return ".".join(["openfmb", profile.DESCRIPTOR.full_name])
+def profile_to_subject(device_mrid, profile):
+    """Convert the profile to it's topic as per RMQ.26.6.5.2.
+
+    :param device_mrid: The MRID of the device.
+    :param profile: The protobuf profile object.
+    """
+    return ".".join(["openfmb", profile.DESCRIPTOR.full_name, device_mrid])
 
 
 class NatsSubscriber():
@@ -54,7 +60,7 @@ class NatsSubscriber():
     async def event_handler(self, model, msg):
         """Handle messages received from NATS.
 
-        :param model: TConstructor for the protobuf object to decode the data
+        :param model: Constructor for the protobuf object to decode the data
         :param msg: The message received from NATS.
         """
         try:
@@ -65,9 +71,13 @@ class NatsSubscriber():
             profile = model()
             profile.ParseFromString(msg_data)
 
+            # The last part of the subject is the MRID of the conducting
+            # equipment, so extract that value.
+            device_mrid = msg.subject.split(".")[-1]
+
             LOGGER.debug("[Decoded profile '%s']: %s", msg.subject, profile)
 
-            self.system.update_profile(profile)
+            self.system.update_profile(device_mrid, profile)
         except TypeError:
             LOGGER.exception("Error encountered")
 
@@ -75,7 +85,7 @@ class NatsSubscriber():
         """Start the subscriber by connecting to the cluster."""
         await self.nc.connect(servers=self.servers, loop=self.event_loop)
         for profile in SUBSCRIBE_PROFILES_TYPES:
-            subject = profile_to_subject(profile)
+            subject = profile_to_subject("*", profile)
             callback = functools.partial(self.event_handler, profile)
             await self.nc.subscribe(subject, cb=callback)
 
@@ -113,16 +123,17 @@ class NatsPublisher():
         This bridges the reactive and async worlds in this application.
         """
         def callback():
-            asyncio.ensure_future(self.publish(profile[2]))
+            asyncio.ensure_future(self.publish(profile[0], profile[2]))
         asyncio.get_event_loop().call_soon(callback)
 
     @asyncio.coroutine
-    def publish(self, profile):
+    def publish(self, device_mrid, profile):
         """Publish called from the asyncio thread to publish profiles.
 
+        :param device_mrid: The MRID of the associated device.
         :param profile: The profile encoded as an OpenFMB protobuf object.
         """
-        subject = profile_to_subject(profile)
+        subject = profile_to_subject(str(device_mrid), profile)
         yield from self.nc.publish(subject, profile.SerializeToString())
 
 

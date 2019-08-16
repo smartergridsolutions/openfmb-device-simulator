@@ -15,7 +15,7 @@
 
 from datetime import datetime
 import uuid
-from .message import set_bcr, set_cmv
+from .message import set_bcr, set_phase_a_mmxu
 from .conducting_equipment import ConductingEquipment
 import commonmodule_pb2 as cm
 import generationmodule_pb2 as gm
@@ -72,20 +72,20 @@ class SinglePhaseGenerator(ConductingEquipment):
     def to_mmxu(self, mmxu):
         """Write the MMXU data into the specified structure."""
         now = datetime.now()
-        sk = cm.UnitSymbolKind
-        set_cmv(mmxu.A.phsA, self.i_mag, 0, sk.UnitSymbolKind_Amp, now)
 
-        mmxu.Hz.mag.f.value = self.hz
-        mmxu.Hz.units.SIUnit = sk.UnitSymbolKind_Hz
+        mmxu_dict = {
+            "A": self.i_mag,
+            "Hz": self.hz,
+            "PF": 1,
+            "PFSign": 0,
+            "V": self.ph_v,
+            "VA": self.va,
+            "VAr": 0,
+            "W": self.w
+        }
+        set_phase_a_mmxu(mmxu, mmxu_dict, now)
 
-        set_cmv(mmxu.PF.phsA, 1, 0, sk.UnitSymbolKind_none, now)
-
-        mmxu.PFSign.setVal = 0
-
-        set_cmv(mmxu.PhV.phsA, self.ph_v, 0, sk.UnitSymbolKind_V, now)
-        set_cmv(mmxu.VA.phsA, self.va, 0, sk.UnitSymbolKind_VA, now)
-        set_cmv(mmxu.VAr.phsA, 0, 0, sk.UnitSymbolKind_VAr, now)
-        set_cmv(mmxu.W.phsA, self.w, 0, sk.UnitSymbolKind_W, now)
+        return mmxu
 
     def to_mmtr(self, mmtr):
         """Write the MMTR data into the specified structure."""

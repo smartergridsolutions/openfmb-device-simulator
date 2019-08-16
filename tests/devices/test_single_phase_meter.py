@@ -23,12 +23,6 @@ def test_device_mrid_automatically_creates():
     assert sph.device_mrid is not None
 
 
-def test_control_mrids_default_is_empty():
-    sph = SinglePhaseMeter()
-
-    assert len(sph.control_mrids()) == 0
-
-
 def test_to_profiles():
     uuid_val = "12345678-1234-5678-1234-567812345678"
     sph = SinglePhaseMeter(UUID(uuid_val))
@@ -38,14 +32,14 @@ def test_to_profiles():
     assert profiles[0].meter.conductingEquipment.mRID == uuid_val
 
 
-def test_to_generation_reading_when_not_set_power():
+def test_to_meter_reading_when_not_set_power():
     sph = SinglePhaseMeter()
     gm = sph.to_meter_reading()
 
     assert gm.readingMMXU.W.phsA.cVal.mag.f.value == 1000000
 
 
-def test_to_generation_reading_when_power_is_set():
+def test_to_meter_reading_when_power_is_set():
     sph = SinglePhaseMeter()
     sph.w = 2000
     gm = sph.to_meter_reading()
@@ -53,7 +47,7 @@ def test_to_generation_reading_when_power_is_set():
     assert gm.readingMMXU.W.phsA.cVal.mag.f.value == 2000
 
 
-def test_to_generation_reading_when_power_is_set_neg():
+def test_to_meter_reading_when_power_is_set_neg():
     sph = SinglePhaseMeter()
     sph.w = -2000
     gm = sph.to_meter_reading()

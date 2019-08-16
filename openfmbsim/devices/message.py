@@ -13,8 +13,53 @@
 # limitations under the License.
 """Common utilities for writing messages."""
 
+import commonmodule_pb2 as cm
 from datetime import datetime
 from ..message import write_timestamp
+
+
+def set_phase_a_mmxu(mmxu, mmxu_dict: dict, now: datetime):
+    """Set the values in the MMXU structure.
+
+    :param mmxu: The MMXU structure to populate.
+    :param mmxu_dict: Dict of MMXU values.
+    :param now: The timestamp for the value.
+    """
+    sk = cm.UnitSymbolKind
+    set_cmvs([mmxu.A.phsA, mmxu.A.net], mmxu_dict["A"], 0,
+             sk.UnitSymbolKind_Amp, now)
+
+    mmxu.Hz.mag.f.value = mmxu_dict["Hz"]
+    mmxu.Hz.units.SIUnit = sk.UnitSymbolKind_Hz
+
+    set_cmvs([mmxu.PF.phsA, mmxu.PF.net], mmxu_dict["PF"], 0,
+             sk.UnitSymbolKind_none, now)
+
+    mmxu.PFSign.setVal = mmxu_dict["PFSign"]
+
+    set_cmvs([mmxu.PhV.phsA, mmxu.PhV.net], mmxu_dict["V"], 0,
+             sk.UnitSymbolKind_V, now)
+    set_cmvs([mmxu.VA.phsA, mmxu.VA.net], mmxu_dict["VA"], 0,
+             sk.UnitSymbolKind_VA, now)
+    set_cmvs([mmxu.VAr.phsA, mmxu.VAr.net], mmxu_dict["VAr"], 0,
+             sk.UnitSymbolKind_VAr, now)
+    set_cmvs([mmxu.W.phsA, mmxu.W.net], mmxu_dict["W"], 0,
+             sk.UnitSymbolKind_W, now)
+
+
+def set_cmvs(cmvs, mag, ang, unit, now: datetime):
+    """Set the values in the specified CMV structures.
+
+    :param mag: The value's magnitude.
+    :param ang: The value's angle.
+    :param unit: The value's unit.
+    :param now: The timestamp for the value.
+    """
+    for cmv in cmvs:
+        cmv.cVal.mag.f.value = mag
+        cmv.cVal.ang.f.value = ang
+        cmv.units.SIUnit = unit
+        write_timestamp(cmv.t, now)
 
 
 def set_cmv(cmv, mag, ang, unit, now: datetime):

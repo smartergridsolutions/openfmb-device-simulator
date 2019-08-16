@@ -35,12 +35,20 @@ def test_remove_model_when_exists():
     assert len(system.subscriptions) == 0
 
 
+def test_update_profile_when_mrid_doesnot_exist():
+    # We have this to ensure that we are getting good test coverage.
+    system = SimulatedSystem()
+
+    profile = gm.GenerationControlProfile()
+    system.update_profile("ae8b5a94-fa97-4140-96f1-1b2f6b9255f8", profile)
+
+
 def test_update_profile_when_invalid_mrid():
     # We have this to ensure that we are getting good test coverage.
     system = SimulatedSystem()
 
     profile = gm.GenerationControlProfile()
-    system.update_profile(profile)
+    system.update_profile("ae8b5a94-fa97-4140-96f1", profile)
 
 
 def test_update_profile_when_mrid_matches_device():
@@ -53,7 +61,7 @@ def test_update_profile_when_mrid_matches_device():
 
     profile = gm.GenerationControlProfile()
     profile.generatingUnit.conductingEquipment.mRID = str(device_mrid)
-    system.update_profile(profile)
+    system.update_profile(str(device_mrid), profile)
 
     battery.update_profile.assert_called_once_with(profile)
 

@@ -16,8 +16,7 @@
 import logging
 import rx
 import uuid
-from openfmbsim.simulated_device import SimulatedDevice
-import generationmodule_pb2 as gm
+from .simulated_device import SimulatedDevice
 
 
 LOGGER = logging.getLogger(__name__)
@@ -117,24 +116,20 @@ class SimulatedSystem(object):
         if subscription is not None:
             subscription.dispose()
         else:
-            LOGGER.warning("Unable to find subscriptioni with ID %s", mrid)
+            LOGGER.warning("Unable to find subscription with ID %s", mrid)
 
         return found
 
-    def update_profile(self, profile):
+    def update_profile(self, device_mrid, profile):
         """Handle a control request encoded as a profile for a model.
 
+        :param device_mrid: The MRID of the associated device.
         :param profile: The profile describing the control update.
         """
-        if isinstance(profile, gm.GenerationControlProfile):
-            mrid_str = profile.generatingUnit.conductingEquipment.mRID
-        else:
-            mrid_str = ""
-
         try:
-            mrid = uuid.UUID(mrid_str)
+            mrid = uuid.UUID(device_mrid)
         except ValueError:
-            LOGGER.error("Profile MRID %s is not valid UUID.", mrid_str)
+            LOGGER.error("Profile MRID %s is not valid UUID.", device_mrid)
             return
 
         # Find the device that that mrid
@@ -144,4 +139,4 @@ class SimulatedSystem(object):
         if device is not None:
             device.update_profile(profile)
         else:
-            LOGGER.error("Device MRID %s does not exist.", mrid_str)
+            LOGGER.error("Device MRID %s does not exist.", device_mrid)

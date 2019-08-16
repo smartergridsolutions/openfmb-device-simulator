@@ -18,6 +18,9 @@ import pytest
 import rx
 from openfmbsim.simulated_device import SimulatedDevice
 from openfmbsim.devices.single_phase_generator import SinglePhaseGenerator
+from openfmbsim.devices.single_phase_recloser import SinglePhaseRecloser
+import commonmodule_pb2 as cm
+import reclosermodule_pb2 as rm
 
 
 @pytest.mark.asyncio
@@ -48,3 +51,23 @@ async def test_when_constructed_generates_periodic_events():
     assert first_two[0][1] < first_two[1][1]
 
     dev.dispose()
+
+
+def test_when_update_device_then_generates_status():
+    device_mrid = "97aad232-578d-4223-b624-aba3298b239e"
+    model = SinglePhaseRecloser()
+    dev = SimulatedDevice(device_mrid, model)
+
+    # Create the profile to open the recloser
+    rp = rm.RecloserControlProfile()
+    rp.recloser.conductingEquipment.mRID = device_mrid
+
+    switch_pt = rp.recloserControl.recloserControlFSCC\
+        .switchControlScheduleFSCH.ValDCSG.crvPts.add()
+    switch_pt = cm.SwitchPoint()
+    switch_pt.Pos.ctlVal = True
+
+    # Now update the device with this control request
+    dev.update_profile(rp)
+
+    assert model.position == SinglePhaseRecloser.OPEN

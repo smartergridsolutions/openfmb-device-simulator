@@ -18,9 +18,8 @@ from datetime import timedelta, datetime
 import logging
 import rx
 import threading
-from typing import Iterator
 import uuid
-from openfmbsim.message import write_timestamp
+from .message import write_timestamp
 
 LOGGER = logging.getLogger(__name__)
 
@@ -118,7 +117,3 @@ class SimulatedDevice(object):
     def device_mrid(self) -> uuid.UUID:
         """Get the ID of the underlying device."""
         return self.model.mrid
-
-    def control_mrids(self) -> Iterator[uuid.UUID]:
-        """Get the MRIDs of the controls in the simulated device."""
-        yield from self.model.control_mrids
