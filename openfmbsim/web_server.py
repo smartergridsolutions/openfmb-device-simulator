@@ -19,9 +19,11 @@ import threading
 import uuid
 from google.protobuf.json_format import MessageToJson
 from quart import Quart, render_template, make_response, request
+from .devices.single_phase_breaker import SinglePhaseBreaker
 from .devices.single_phase_generator import SinglePhaseGenerator
 from .devices.single_phase_meter import SinglePhaseMeter
 from .devices.single_phase_recloser import SinglePhaseRecloser
+from .devices.single_phase_solar import SinglePhaseSolar
 
 LOGGER = logging.getLogger(__name__)
 
@@ -67,9 +69,11 @@ async def create():
     device_type = data["type"]
 
     types = {
+        "breaker": SinglePhaseBreaker,
         "generator": SinglePhaseGenerator,
         "meter": SinglePhaseMeter,
         "recloser": SinglePhaseRecloser,
+        "solar": SinglePhaseSolar,
     }
 
     constructor = types.get(device_type, None)

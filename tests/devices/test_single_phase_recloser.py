@@ -35,7 +35,7 @@ def test_to_profiles():
 
 def test_to_recloser_reading_when_not_set_power():
     spr = SinglePhaseRecloser()
-    rm = spr.to_meter_reading()
+    rm = spr.to_reading()
 
     assert rm.readingMMXU.W.phsA.cVal.mag.f.value == 1000000
 
@@ -44,7 +44,7 @@ def test_to_recloser_reading_when_recloer_open():
     spr = SinglePhaseRecloser()
 
     spr.position = SinglePhaseRecloser.OPEN
-    rm = spr.to_meter_reading()
+    rm = spr.to_reading()
 
     assert rm.readingMMXU.W.phsA.cVal.mag.f.value == 0
 
@@ -52,7 +52,7 @@ def test_to_recloser_reading_when_recloer_open():
 def test_to_recloser_reading_when_power_is_set():
     spr = SinglePhaseRecloser()
     spr.w = 2000
-    rm = spr.to_meter_reading()
+    rm = spr.to_reading()
 
     assert rm.readingMMXU.W.phsA.cVal.mag.f.value == 2000
 
@@ -60,6 +60,6 @@ def test_to_recloser_reading_when_power_is_set():
 def test_to_recloser_reading_when_power_is_set_neg():
     spr = SinglePhaseRecloser()
     spr.w = -2000
-    rm = spr.to_meter_reading()
+    rm = spr.to_reading()
 
     assert rm.readingMMXU.W.phsA.cVal.mag.f.value == -2000

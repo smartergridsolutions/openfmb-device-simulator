@@ -11,45 +11,45 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests of the simulated single phase generator module."""
+"""Tests of the simulated single phase solar module."""
 
 from uuid import UUID
-from openfmbsim.devices.single_phase_generator import SinglePhaseGenerator
+from openfmbsim.devices.single_phase_solar import SinglePhaseSolar
 
 
 def test_device_mrid_automatically_creates():
-    sph = SinglePhaseGenerator()
+    spb = SinglePhaseSolar()
 
-    assert sph.device_mrid is not None
+    assert spb.device_mrid is not None
 
 
 def test_to_profiles():
     uuid_val = "12345678-1234-5678-1234-567812345678"
-    sph = SinglePhaseGenerator(UUID(uuid_val))
+    sph = SinglePhaseSolar(UUID(uuid_val))
     profiles = list(sph.to_profiles())
 
-    assert len(profiles) == 1
-    assert profiles[0].generatingUnit.conductingEquipment.mRID == uuid_val
+    assert len(profiles) == 2
+    assert profiles[0].solarInverter.conductingEquipment.mRID == uuid_val
 
 
-def test_to_generation_reading_when_not_set_power():
-    sph = SinglePhaseGenerator()
-    gm = sph.to_generation_reading()
+def test_to_reading_when_not_set_power():
+    sph = SinglePhaseSolar()
+    gm = sph.to_reading()
 
     assert gm.readingMMXU.W.phsA.cVal.mag.f.value == 1000000
 
 
-def test_to_generation_reading_when_power_is_set():
-    sph = SinglePhaseGenerator()
+def test_to_reading_when_power_is_set():
+    sph = SinglePhaseSolar()
     sph.w = 2000
-    gm = sph.to_generation_reading()
+    gm = sph.to_reading()
 
     assert gm.readingMMXU.W.phsA.cVal.mag.f.value == 2000
 
 
-def test_to_generation_reading_when_power_is_set_neg():
-    sph = SinglePhaseGenerator()
+def test_to_reading_when_power_is_set_neg():
+    sph = SinglePhaseSolar()
     sph.w = -2000
-    gm = sph.to_generation_reading()
+    gm = sph.to_reading()
 
     assert gm.readingMMXU.W.phsA.cVal.mag.f.value == -2000
