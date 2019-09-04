@@ -7,9 +7,9 @@
 
 OpenFMB Device Simulator is a simple simulator that publishes information using
 NATS messaging about simulated devices and accepts control requests for those
-devices. The intended purpose of this simulator is to enable testing with other
-systems. A minimal system contains several components and this project provides
-a couple of those to aid with development and testing:
+devices. The intended purpose of this simulator is to enable testing of other
+systems. A minimal OpenFMB system contains several components depicted below and
+this project provides a simple implementation of the highlighted items:
 
 ```
          ┌───────────────────────────────┐
@@ -53,4 +53,4 @@ particular, we are seeking help in:
 
 If you are not sure, create an issue and we'll respond.
 
-See the developing guide if you want to contribute code.
+See the [contributing guide](CONTRIBUTING.md) if you want to contribute code.
