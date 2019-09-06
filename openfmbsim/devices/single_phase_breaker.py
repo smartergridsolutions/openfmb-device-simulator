@@ -11,20 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Simple simulator for a recloser unit."""
+"""Simple simulator for a breaker unit."""
 
 from datetime import datetime
 import uuid
 from .message import set_phase_a_mmxu
 from .single_phase_meter import SinglePhaseMeter
-import reclosermodule_pb2 as rm
+import breakermodule_pb2 as bm
 
 
-class SinglePhaseRecloser(SinglePhaseMeter):
-    """A simulated recloser on a single phase.
+class SinglePhaseBreaker(SinglePhaseMeter):
+    """A simulated breaker on a single phase.
 
     This is very much like a meter, except that the meter automatically
-    turns off when the recloser is open.
+    turns off when the breaker is open.
     """
 
     OPEN = 0
@@ -32,48 +32,48 @@ class SinglePhaseRecloser(SinglePhaseMeter):
 
     def __init__(self, cond_equip_mrid: uuid.UUID = None,
                  cond_equip_name: str = None):
-        """Construct a new instance of this recloser model.
+        """Construct a new instance of this breaker model.
 
         :param cond_equip_mrid: The MRID of the conducting unit.
         :param cond_equip_name: The name of the conducting unit.
         """
         super().__init__(cond_equip_mrid, cond_equip_name)
 
-        self._position = SinglePhaseRecloser.CLOSED
+        self._position = SinglePhaseBreaker.CLOSED
 
     def to_profiles(self):
         """Get all of the profiles that this generates."""
-        rp = rm.RecloserReadingProfile()
-        equipment = rp.recloser.conductingEquipment
+        brp = bm.BreakerReadingProfile()
+        equipment = brp.breaker.conductingEquipment
         equipment.mRID = str(self.mrid)
         equipment.namedObject.name.value = self.name
-        rr = rp.recloserReading.add()
+        rr = brp.breakerReading.add()
         rr.CopyFrom(self.to_reading())
-        yield rp
+        yield brp
 
-        rsp = rm.RecloserStatusProfile()
-        equipment = rsp.recloser.conductingEquipment
+        bsp = bm.BreakerStatusProfile()
+        equipment = bsp.breaker.conductingEquipment
         equipment.mRID = str(self.mrid)
         equipment.namedObject.name.value = self.name
 
         position = 1 if self.is_closed else 2
-        rsp.recloserStatus.statusAndEventXCBR.Pos.stVal = position
-        yield rsp
+        bsp.breakerStatus.statusAndEventXCBR.Pos.stVal = position
+        yield bsp
 
     def to_reading(self):
         """Get the recloser reading profile information for this model."""
         with self.lock:
             self.update_mmtr(datetime.utcnow())
 
-            rr = rm.RecloserReading()
-            self.to_mmxu(rr.readingMMXU)
-            self.to_mmtr(rr.readingMMTR)
+            br = bm.BreakerReading()
+            self.to_mmxu(br.readingMMXU)
+            self.to_mmtr(br.readingMMTR)
 
-        return rr
+        return br
 
     def to_mmxu(self, mmxu):
         """Write the MMXU data into the specified structure."""
-        if (self.position == SinglePhaseRecloser.CLOSED):
+        if (self.position == SinglePhaseBreaker.CLOSED):
             super().to_mmxu(mmxu)
         else:
             now = datetime.now()
@@ -91,7 +91,7 @@ class SinglePhaseRecloser(SinglePhaseMeter):
 
     def update_mmtr(self, now):
         """Update the present net energy values."""
-        if (self.position == SinglePhaseRecloser.CLOSED):
+        if (self.position == SinglePhaseBreaker.CLOSED):
             # We only actually update the values if the position is closed
             super().update_mmtr(now)
         else:
@@ -104,15 +104,15 @@ class SinglePhaseRecloser(SinglePhaseMeter):
         is_closed = control.recloserControl.recloserControlFSCC\
             .switchControlScheduleFSCH.ValDCSG.crvPts[0].Pos.ctlVal
 
-        position = SinglePhaseRecloser.OPEN
+        position = SinglePhaseBreaker.OPEN
         if is_closed:
-            position = SinglePhaseRecloser.CLOSED
+            position = SinglePhaseBreaker.CLOSED
 
         self.position = position
 
     @property
     def position(self):
-        """Get the present recloser position."""
+        """Get the present breaker position."""
         return self._position
 
     @position.setter
@@ -129,4 +129,4 @@ class SinglePhaseRecloser(SinglePhaseMeter):
     @property
     def is_closed(self):
         """Get if this recloser is closed."""
-        return self.position == SinglePhaseRecloser.CLOSED
+        return self.position == SinglePhaseBreaker.CLOSED

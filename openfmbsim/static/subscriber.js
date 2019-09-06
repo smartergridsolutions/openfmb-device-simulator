@@ -60,6 +60,10 @@ const addConductingEquipment = (parent, profile, keys) => {
  *                        objects following the normal OpenFMB structure.
  */
 const addValuesDefinition = (parent, values) => {
+    if (!values) {
+        return
+    }
+    
     Object.entries(values).forEach((entry) => {
         const key = entry[0];
         const value = entry[1];
@@ -111,11 +115,19 @@ const createDeviceDefinition = (evtData) => {
     const msgDate = new Date(0);
     msgDate.setUTCSeconds(parseInt(evtData.readingMessageInfo.messageInfo.messageTimeStamp.seconds, 10));
     addDefinition(itemDefs, "Message date", msgDate);
-    addConductingEquipment(itemDefs, evtData, ["generatingUnit", "meter"]);
+    addConductingEquipment(itemDefs, evtData, ["breaker", "generatingUnit", "meter", "recloser", "solarInverter"]);
 
-    const owner = evtData.generationReading || evtData.meterReading;
-    addValuesDefinition(itemDefs, owner && owner.readingMMTR);
-    addPhaseValuesDefinition(itemDefs, owner && owner.readingMMXU);
+    const owner = evtData.generationReading || evtData.meterReading || evtData.solarReading;
+    if (owner) {
+        addValuesDefinition(itemDefs, owner && owner.readingMMTR);
+        addPhaseValuesDefinition(itemDefs, owner && owner.readingMMXU);
+    }
+
+    const ownerGroup = evtData.breakerReading || evtData.recloserReading
+    if (ownerGroup && ownerGroup.length >= 1) {
+        addValuesDefinition(itemDefs, ownerGroup[0].readingMMTR);
+        addPhaseValuesDefinition(itemDefs, ownerGroup[0].readingMMXU);
+    }
 
     return itemDefs;
 }
@@ -172,6 +184,9 @@ const addOrUpdate = (evtData) => {
 
     // Which node with the devices table do we want to add this to?
     // Get the ID of the associated IED
+    if (!evtData.ied) {
+        return
+    }
     const iedMrid = evtData.ied.identifiedObject.mRID;
 
     // Do we have a node for this already? If not, we create it and add it now

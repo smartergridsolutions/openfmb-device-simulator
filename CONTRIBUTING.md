@@ -1,10 +1,8 @@
-Developing
-==========
+# Contributing
 
 This guide will help you set yourself up to contribute code to this project.
 
-Prerequisites
-~~~~~~~~~~~~~
+## Prerequisites
 
 You need to have the following installed on your development machine:
 
@@ -13,77 +11,74 @@ You need to have the following installed on your development machine:
 
 (Our tests run on both environment, so you need both installed).
 
-Build and Run
-~~~~~~~~~~~~~
+## Build and Run
 
 It is normally good practice to setup a virtual environment and many IDEs can
 help set that up for you, so that is not covered here.
 
 Once you have Python on your path:
 
-#. Install the requirements with pip:
+1. Install the requirements with pip:
 
-   .. code-block:: shell
-
+     ```sh
      pip install -r requirements.txt
+     ```
 
-#. Run NATS 2.x. The application expects to be able to communicate with NATS
+1. Run NATS 2.x. The application expects to be able to communicate with NATS
    on localhost. If you don't already have NATS and you do have Docker, you
    can start NATS through docker:
 
-   .. code-block:: shell
-
+     ```sh
      cd env/nats
      docker build -t nats .
      docker run -it nats
+     ```
 
-#. Run the application from the shell.
+1. Run the application from the shell.
 
-   .. code-block:: shell
-
+     ```sh
      python -m openfmbsim.server
+     ```
 
-#. Listen to messages from the simulator on NATS.
+1. Listen to messages from the simulator on NATS.
 
-Running in a Debugger
-~~~~~~~~~~~~~~~~~~~~~
+## Running in a Debugger
 
 These steps describe how to run the application from Visual Studio Code. You
 need a running instance of NATS for the system to connect to. Other IDEs
 support similar methods:
 
-#. Create a new debug configuration to run Python module:
+1. Create a new debug configuration to run Python module:
 
-   .. code-block:: json
-
+     ```js
       {
             "name": "Python: OpenFMB Simulator Module",
             "type": "python",
             "request": "launch",
             "module": "openfmbsim.server"
       }
+     ```
 
-#. Run the debug configuration. That's it!
+1. Run the debug configuration. That's it!
 
-Testing
-~~~~~~~
+## Testing
 
 Tests (unit, linting, coverage) are normally run with tox.
 
 The automated build enforces compliance with Python PEP 8, PEP 257, test
 coverage and other best practices. Docstrings should be written in RST format.
 
-#. If you don't have tox already installed in your environment:
+1. If you don't have tox already installed in your environment:
 
-  .. code-block:: shell
-
+     ```sh
      pip install tox
+     ```
 
-#. Run tests at the command line from the root directory of this repository:
+1. Run tests at the command line from the root directory of this repository:
 
-  .. code-block:: shell
-
+     ```sh
      tox
+     ```
 
 Unit tests require pytest and pytest-asyncio. They can be run directly from
 your IDE.

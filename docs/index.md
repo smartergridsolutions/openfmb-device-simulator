@@ -111,7 +111,7 @@ being to publish messages to NATS using the default generator reading profile.
 
 You can use a 3rd party tool such at
 [nats-top](https://github.com/nats-io/nats-top) to observe message delivery
-statistics. 
+statistics.
 
 ### Control
 
@@ -126,9 +126,33 @@ Rather, it enables capabilities to add or remove devices that are not messages
 defined by the OpenFMB standard. However, it also includes basic visualization
 for the defined devices.
 
+## Creating or Deleting Devices
+
+The simulator creates a default simulated generator on startup. Devices
+can be added or deleted after startup using the web interface.
+
+Follow the steps below to create a new device:
+
+1. Open the web interface
+1. Choose the type of device you want to create
+1. Select to create the device
+
+A default device of the selected type is created. Messages will shortly appear
+on the front end and NATS messaging service.
+
+Follow the steps below to delete an existing device:
+
+1. Select the device to delete and click delete
+
 ## Supported Messages
 
 The simulator can model devices with the following profiles:
 
+* BreakerReadingProfile
+* BreakerStatusProfile
 * GenerationReadingProfile
 * MeterReadingProfile
+* RecloserControlProfile
+* RecloserReadingProfile
+* RecloserStatusProfile
+* SolarReadingProfile
