@@ -1,6 +1,8 @@
 # Contributing
 
 This guide will help you set yourself up to contribute code to this project.
+See the [user manual](https://smartergridsolutions.github.io/openfmb-device-simulator/)
+if you simply want to use the OpenFMB Device Simulator.
 
 ## Prerequisites
 
@@ -10,6 +12,20 @@ You need to have the following installed on your development machine:
 * NATS 2.x
 
 (Our tests run on both environment, so you need both installed).
+
+## Clone the Repository
+
+Run the following in a terminal to clone the repository and its submodules:
+
+```sh
+git clone --recursive https://gitlab.com/smatergridsolutions/openfmb-device-simulator.git
+```
+
+If you already have cloned the repository and did not clone recursively, you can clone the submodules with:
+
+```sh
+git submodule update --init --recursive
+```
 
 ## Build and Run
 
