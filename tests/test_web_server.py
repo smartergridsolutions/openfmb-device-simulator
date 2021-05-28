@@ -45,7 +45,8 @@ async def test_index_returns_page(test_app):
     test_client = test_app.test_client()
     response = await test_client.get("/")
     assert response.status_code == 200
-    body = await response.get_data(raw=False)
+    body = await response.get_data(as_text=True)
+    print(body)
     assert "<html>" in body
 
 
